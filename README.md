@@ -18,11 +18,6 @@ Python — and writes everything to `warranty_results.xlsx`.
 
 ## Setup
 
-# To finally run the scrapper program, run the below command:
-
-```bash
-xvfb-run -a python hp_warranty_checker.py
-
 ```bash
 # clone the repo, then:
 cd hp-warranty-checker
@@ -41,7 +36,7 @@ playwright install chromium
    e.g. `https://support.hp.com/in-en/check-warranty` for India.
 3. Run:
    ```bash
-   python hp_warranty_checker.py
+   xvfb-run -a python hp_warranty_checker.py
    ```
 4. A Chrome window opens and works through your list. **Stay nearby** — if a
    CAPTCHA appears, solve it in the browser and press Enter in the terminal.
@@ -68,6 +63,4 @@ don't reduce it much or HP will block your IP).
   or **HP CMSL** for managed fleets.
 - This project is not affiliated with or endorsed by HP.
 
-## License
 
-MIT
