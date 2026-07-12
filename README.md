@@ -18,9 +18,10 @@ Python — and writes everything to `warranty_results.xlsx`.
 
 ## Setup
 
-To finally run the scrapper program, run the below command:
+# To finally run the scrapper program, run the below command:
+
 ```bash
-# xvfb-run -a python hp_warranty_checker.py
+xvfb-run -a python hp_warranty_checker.py
 
 ```bash
 # clone the repo, then:
