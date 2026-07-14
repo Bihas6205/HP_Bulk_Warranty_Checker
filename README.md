@@ -16,7 +16,46 @@ Python — and writes everything to `warranty_results.xlsx`.
 - 🧩 Handles HP's "recycled serial" case (asks for Product Number)
 - 🖼️ Saves a debug screenshot for any serial it couldn't parse
 
-## Setup
+## Web UI (GitHub Codespaces)
+
+There's a browser-based UI on top of the same scraper (`app.py` +
+`warranty_engine.py`), built specifically to run inside a Codespace: it
+runs Chromium headless (no monitor needed), shows live progress in a
+table, and lets you download the results when it's done.
+
+**1. Open the Codespace**
+- On the repo page, click the green **Code** button → **Codespaces** tab → **Create codespace on main**.
+- Wait for it to finish building (~1-2 min). You'll land in a VS Code-in-browser with a terminal at the bottom.
+
+**2. Install dependencies** (in the Codespace terminal)
+```bash
+pip install -r requirements.txt
+playwright install --with-deps chromium
+```
+`--with-deps` also installs the system libraries Chromium needs — skip it and headless Chromium will fail to launch on a bare container.
+
+**3. Start the server**
+```bash
+python app.py
+```
+You'll see `Running on http://127.0.0.1:5000`.
+
+**4. Open the UI in your browser**
+- Codespaces auto-detects port 5000 and shows a popup: click **Open in Browser**.
+- If you miss the popup: go to the **Ports** tab (next to Terminal), find port `5000`, and click the globe icon.
+
+**5. Use it**
+- Click **Choose serials.xlsx / .csv**, pick your file (needs a `Serial Number` column, optional `Product Number` column), click **Upload**.
+- Click **Start batch**. Rows fill in live as each serial is checked (expect ~10-15s per serial — that delay is intentional, don't rush it).
+- Click **Stop** any time to pause; progress is saved after every row, so starting again resumes where you left off.
+- When done (or partway through), click **Download .xlsx** or **Download .csv**.
+
+**Notes specific to running headless in a Codespace:**
+- There's no visible browser window, so if HP shows a CAPTCHA the tool can't pause for you to solve it. It waits 25s and retries once, then logs a note on that row ("Blocked by CAPTCHA/bot-check") and moves on — re-run those specific serials later if that happens a lot.
+- Cloud/datacenter IPs (which is what a Codespace runs on) get flagged for CAPTCHAs more often than a home connection. If you see a lot of blocked rows, that's why.
+- The uploaded file and results are stored in a `data/` folder inside the Codespace (not committed to git). Download your results before you delete/stop the Codespace, or they're gone with it.
+
+## Setup (original CLI script)
 
 ```bash
 # clone the repo, then:

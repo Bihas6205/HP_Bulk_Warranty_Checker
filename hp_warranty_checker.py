@@ -1,5 +1,11 @@
 """
-HP Warranty Bulk Checker
+HP Warranty Bulk Checker (original CLI version)
+================================================
+NOTE: There's now a web UI for this (app.py + warranty_engine.py) built to
+run inside GitHub Codespaces headlessly, with live progress in the browser
+instead of a visible Chrome window. See README.md "Web UI (Codespaces)".
+This file is kept as-is for anyone who wants to run it headful, locally,
+with the original CLI/manual CAPTCHA-solving flow.
 ========================
 Reads laptop serial numbers from an Excel file, looks each one up on
 HP's warranty page using a real automated browser (Playwright), and
