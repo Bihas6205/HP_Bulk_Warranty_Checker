@@ -42,14 +42,14 @@ from playwright.sync_api import sync_playwright
 # ----------------------------- CONFIG ---------------------------------
 INPUT_FILE = "serials.xlsx"          # your input file (.xlsx or .csv)
 OUTPUT_FILE = "warranty_results.xlsx"
-WARRANTY_URL = "https://support.hp.com/us-en/check-warranty"
+WARRANTY_URL = "https://support.hp.com/in-en/check-warranty"
 # Change to your region if needed, e.g. "https://support.hp.com/in-en/check-warranty"
 
 MIN_DELAY, MAX_DELAY = 8, 15   # seconds to wait between lookups.
 # Why the random delay? Hitting a site every 2 seconds like a machine
 # is the #1 way to get blocked. Random 8-15s looks like a bored human.
 
-HEADLESS = False  # Keep False! Visible browser = fewer bot blocks,
+HEADLESS = True  # Keep False! Visible browser = fewer bot blocks,
                   # and you can manually solve a CAPTCHA if one pops up.
 # -----------------------------------------------------------------------
 
@@ -176,12 +176,15 @@ def lookup_serial(page, serial: str, product_number: str | None) -> dict:
     if "product number" in body_text.lower() and "cannot be identified" in body_text.lower():
         if product_number:
             try:
-                page.locator("input").nth(1).fill(product_number)
+                pn_input = page.locator("input[placeholder*='Example']")
+                pn_input.first.fill(product_number)
                 page.locator("button:has-text('Submit')").first.click()
                 page.wait_for_load_state("networkidle", timeout=30000)
                 time.sleep(3)
                 body_text = page.inner_text("body")
-            except Exception:
+            except Exception as e:
+                print(f"    DEBUG: product number step error: {e}")
+                page.screenshot(path=f"debug_pn_{serial}.png")
                 row["Notes"] = "Product number step failed"
                 return row
         else:
@@ -194,6 +197,29 @@ def lookup_serial(page, serial: str, product_number: str | None) -> dict:
         input("  Solve it in the browser window, then press Enter here to continue... ")
         time.sleep(2)
         body_text = page.inner_text("body")
+
+    # Some product pages hide Start/End date inside a collapsed
+    # "Additional Information" accordion — click it open if present.
+    try:
+        page.locator("text=Additional Information").first.click(timeout=3000)
+        page.wait_for_load_state("networkidle", timeout=10000)
+        time.sleep(2)
+        body_text = page.inner_text("body")
+    except PWTimeout:
+        pass
+    except Exception:
+        pass
+
+    parsed = extract_dates(body_text)# Some product pages hide Start/End date inside a collapsed
+    # "Additional Information" accordion — click it open if present.
+    try:
+        page.locator("text=Additional Information").first.click(timeout=3000)
+        time.sleep(1)
+        body_text = page.inner_text("body")
+    except PWTimeout:
+        pass
+    except Exception:
+        pass
 
     parsed = extract_dates(body_text)
     row["Warranty Start Date"] = parsed["start_date"] or ""
